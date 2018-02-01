@@ -60,7 +60,7 @@ def get_named_kw_args(fn):
 def has_named_kw_args(fn):
 	params = inspect.signature(fn).parameters
 	for name, param in params.items():
-		if para.kind == inspect.Parameter.KEYWORD_ONLY:
+		if param.kind == inspect.Parameter.KEYWORD_ONLY:
 			return True
 			# this function is similr to the last one
 
@@ -115,7 +115,7 @@ class RequestHandler(object):
 		handler1(request1)
 		'''
 		kw = None
-		if self._has_var_kw_arg or sef._has_named_kw_args or self._required_kw_args:
+		if self._has_var_kw_arg or self._has_named_kw_args or self._required_kw_args:
 			# if fn has parameters like **kw or KEYWORD_ONLY(with or without default value)
 			if request.method == 'POST':
 				if not request.content_type:
@@ -168,7 +168,6 @@ class RequestHandler(object):
 		except APIError as e:
 			return dict(error = e.error, data = e.data, message = e.message)
 
-
 def add_static(app):
 	path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 	app.router.add_static('/static/', path)
@@ -206,7 +205,7 @@ def add_routes(app, module_name):
 		mod = __import__(module_name, globals(), locals())
 	else:
 		name = module_name[n+1:]
-		mod = getattr(__import__(module_name[:n], globals(), local(), [name]), name)
+		mod = getattr(__import__(module_name[:n], globals(), locals(), [name]), name)
 	for attr in dir(mod):
 		if attr.startswith('_'):
 			continue

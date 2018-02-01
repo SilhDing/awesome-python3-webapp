@@ -32,14 +32,14 @@ def init_jinja2(app, **kw):
 		path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 		# __file__ means the module file itself
 	logging.info('set jinja2 template path: %s' % path)
-	env = Environemnt(loader=FileSystemLoader(path), **options)
+	env = Environment(loader=FileSystemLoader(path), **options)
 	filters = kw.get('filters', None)
 	if filters is not None:
 		for name, f in filters.items():
 			env.filters[name] = f
 	app['__templating__'] = env
 
-# middleware #1: logging_factory: to log info of urls before handler.
+# middleware #1: logger_factory: to log info of urls before handler.
 async def logger_factory(app, handler):
 	async def logger(request):
 		logging.info('Request: %s %s' % (request.method, request.path))
@@ -48,6 +48,7 @@ async def logger_factory(app, handler):
 		# after logging continue other tasks by calling handler().
 		# handler here is an instance but callable (see in coroweb.py).
 	return logger
+
 
 # middleware #2
 async def data_factory(app, handler):
@@ -81,7 +82,7 @@ async def response_factory(app, handler):
 			resp = web.Response(body=r.encode('utf-8'))
 			resp.content_type = 'text/html;charset=utf-8'
 			return resp
-		if instance(r, dict):
+		if isinstance(r, dict):
 			template = r.get('__template__')
 			if template is None:
 				resp = web.Response(body=json.dumps(r, ensure_ascii=False, default=lambda o: o.__dict__).encode('utf-8'))
@@ -101,6 +102,7 @@ async def response_factory(app, handler):
 		resp = web.Response(body=str(r).encode('utf-8'))
 		resp.content_type = 'text/plain;charset=utf-8'
 		return resp
+	return response
 
 def datetime_filter(t):
 	print(int(time.time()))
@@ -118,8 +120,8 @@ def datetime_filter(t):
 
 #please make sure that the port is 9000
 async def init(loop):
-	await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='www', password='www', db='awesome')
-	pp = web.Application(loop=loop, middleware = [logger_factory, response_factory])
+	await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='password', db='awesome')
+	app = web.Application(loop=loop,middlewares=[logger_factory,response_factory])
 	init_jinja2(app, filters = dict(datetime = datetime_filter))
 	add_routes(app, 'handlers')
 	add_static(app)
@@ -127,7 +129,6 @@ async def init(loop):
 	logging.info('server started at http://127.0.0.1:9000...')
 	return srv
 
-if __name__ == '__main__':
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(init(loop))
-	loop.run_forever()
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init(loop))
+loop.run_forever()
