@@ -17,7 +17,7 @@ class APIError(Exception):
 		super(APIError, self).__init__(message)
 		self.error = error
 		self.data = data
-		self.messag = message
+		self.message = message
 
 class APIValueError(APIError):
 	"""

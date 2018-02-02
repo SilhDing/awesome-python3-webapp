@@ -61,7 +61,7 @@ yihang = User(
 print('yihang dict:\n', yihang)
 inner = yihang.__mapping__
 
-print('\n------contents in __mapping__ (name, column_type, primary_key, value)------')
+print('\n------contents in __mapping__ (name, column_type, primary_key, default)------')
 for k in inner:
 	v = inner[k]
 	value = v.default() if callable(v.default) else v.default
@@ -71,5 +71,8 @@ print('\n------others------')
 print('__table__: %s' % yihang.__table__)
 print('__primary_key__: %s' % yihang.__primary_key__)
 print('__fields__: %s' % yihang.__fields__)
-'''
 
+args = list(map(yihang.getValueOrDefault, yihang.__fields__))
+args.append(yihang.getValueOrDefault(yihang.__primary_key__))
+print(args)
+'''

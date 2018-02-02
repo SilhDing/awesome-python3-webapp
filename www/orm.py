@@ -57,7 +57,7 @@ to execute INSERT, UPDATE and DELETE
 we can define a general function named execute
 '''
 
-async def execute(sql, args):
+async def execute(sql, args, autocommit = True):
 	log(sql)
 	with (await  __pool) as conn:
 		if not autocommit:
@@ -98,7 +98,7 @@ class StringField(Field):
 
 class BooleanField(Field):
 
-	def __init__(self, name = None, primary_key = False, default = None):
+	def __init__(self, name = None, primary_key = False, default = False):
 		super().__init__(name, 'boolean', False, default)
 
 class IntegerField(Field):
@@ -193,7 +193,7 @@ class Model(dict, metaclass = ModelMetaclass):
 			field = self.__mapping__[key]
 			if field.default is not None:
 				value = field.default() if callable(field.default) else field.default
-				loggig.debug('using default value for %s: %s' % (key, str(value)))
+				logging.debug('using default value for %s: %s' % (key, str(value)))
 				setattr(self, key, value)		
 		return value
 

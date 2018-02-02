@@ -39,6 +39,32 @@ def init_jinja2(app, **kw):
 			env.filters[name] = f
 	app['__templating__'] = env
 
+async def cookie2user(cookie_str):
+	'''
+	Parse cookie and load user if cookie is valid.
+	'''
+	if not cookie_str:
+		return None
+	try:
+		L = cookie_str.split('-')
+		if len(L) != 3:
+			return None
+		uid, expires, sha1 = L
+		if int(expires) < time.time():
+			return None
+		user = await User.find(uid)
+		if user is None:
+			return None
+		s = '%s-%s-%s-%s' % (uid, user.passwd, expires, _COOKIE_KEY)
+		if sha1 != hashlib.sha1(s.encode('utf-8')).hexdigest():
+			logging.info('invalid sha1')
+			return None
+		user.passwd = '******'
+		return user
+	except Exception as e:
+		logging.exception(e)
+		return None
+
 # middleware #1: logger_factory: to log info of urls before handler.
 async def logger_factory(app, handler):
 	async def logger(request):
@@ -48,7 +74,6 @@ async def logger_factory(app, handler):
 		# after logging continue other tasks by calling handler().
 		# handler here is an instance but callable (see in coroweb.py).
 	return logger
-
 
 # middleware #2
 async def data_factory(app, handler):
@@ -103,6 +128,20 @@ async def response_factory(app, handler):
 		resp.content_type = 'text/plain;charset=utf-8'
 		return resp
 	return response
+
+# middleware #4: authentication
+async def auth_factory(app, handler):
+	async def auth(request):
+		logging.info('check user: %s %s' % (request.method, auth_factory,request.path))
+		request.__user__ = None
+		cookie_str = request.cookies.get(COOKIE_NAME)
+		if cookie_str:
+			user = await cookie2user(cookie_str)
+			if user:
+				logging.info('set current user: %s' % user.email)
+				request.__user__ = user
+		return (await handler(reqeust))
+	return auth
 
 def datetime_filter(t):
 	print(int(time.time()))
