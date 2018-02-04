@@ -225,7 +225,7 @@ class Model(dict, metaclass = ModelMetaclass):
 			sql.append(orderBy)
 		limit = kw.get('limit', None)
 		# the case of 'limit' is similar to that of orderBy
-		if limit:
+		if limit is not None:
 			sql.append('limit')
 			if isinstance(limit, int):
 				sql.append('?')
@@ -271,7 +271,7 @@ class Model(dict, metaclass = ModelMetaclass):
 	async def update(self):
 		args = list(map(self.getValue, self.__fields__))
 		args.append(self.getValue(self.__primary_key__))
-		rows = await execute(self.__update, args)
+		rows = await execute(self.__update__, args)
 		if rows != 1:
 			logging.warn('failed to update by primary key: affected rows: %s' % rows)
 

@@ -2,28 +2,37 @@
 
 {% block title %}日志{% endblock %}
 
+{% block beforehead %}
+
+<script>
+</script>
+
+{% endblock %}
+
 {% block content %}
 
     <div class="uk-width-medium-3-4">
-        {% for blog in blogs %}
-            <article class="uk-article">
-                <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
-                <p class="uk-article-meta">发表于{{ blog.created_at|datetime}}</p>
-                <p>{{ blog.summary }}</p>
-                <p><a href="/blog/{{ blog.id }}">继续阅读 <i class="uk-icon-angle-double-right"></i></a></p>
-            </article>
-            <hr class="uk-article-divider">
-        {% endfor %}
+    {% for blog in blogs %}
+        <article class="uk-article">
+            <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
+            <p class="uk-article-meta">发表于{{ blog.created_at|datetime }}</p>
+            <p>{{ blog.summary }}</p>
+            <p><a href="/blog/{{ blog.id }}">继续阅读... <i class="uk-icon-angle-double-right"></i></a></p>
+        </article>
+        <hr class="uk-article-divider">
+    {% endfor %}
+    <p>搜索到 {{page.item_count}} 条记录, 当前第 {{ page.page_index }}/{{page.page_count}} 页</p>
+    {{ pagination('/?page=', page) }}
     </div>
 
     <div class="uk-width-medium-1-4">
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
-                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">编程</a></li>
-                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">读书</a></li>
-                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Python教程</a></li>
-                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Git教程</a></li>
+                <li><i class="uk-icon-code"></i> <a target="_blank" href=http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000>Python教程</a></li>
+                <li><i class="uk-icon-code-fork"></i> <a target="_blank" href=http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000>Git教程</a></li>
+                <li><i class="uk-icon-weibo"></i> <a target="_blank" href=https://weibo.com/hf461923555> 新浪微博</a></li>
+                <li><i class="uk-icon-linkedin"></i> <a target="_blank" href=http://www.linkedin.com/in/yihang-ding-10510811a/> LinkedIn</a></li>
             </ul>
         </div>
     </div>

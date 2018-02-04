@@ -15,6 +15,8 @@ from aiohttp import web
 import orm
 from jinja2 import Environment,FileSystemLoader
 from coroweb import add_routes, add_static
+from config  import configs
+from handlers import cookie2user, COOKIE_NAME
 
 def init_jinja2(app, **kw):
 	logging.info('init jinja2...')
@@ -39,32 +41,6 @@ def init_jinja2(app, **kw):
 			env.filters[name] = f
 	app['__templating__'] = env
 
-async def cookie2user(cookie_str):
-	'''
-	Parse cookie and load user if cookie is valid.
-	'''
-	if not cookie_str:
-		return None
-	try:
-		L = cookie_str.split('-')
-		if len(L) != 3:
-			return None
-		uid, expires, sha1 = L
-		if int(expires) < time.time():
-			return None
-		user = await User.find(uid)
-		if user is None:
-			return None
-		s = '%s-%s-%s-%s' % (uid, user.passwd, expires, _COOKIE_KEY)
-		if sha1 != hashlib.sha1(s.encode('utf-8')).hexdigest():
-			logging.info('invalid sha1')
-			return None
-		user.passwd = '******'
-		return user
-	except Exception as e:
-		logging.exception(e)
-		return None
-
 # middleware #1: logger_factory: to log info of urls before handler.
 async def logger_factory(app, handler):
 	async def logger(request):
@@ -75,7 +51,24 @@ async def logger_factory(app, handler):
 		# handler here is an instance but callable (see in coroweb.py).
 	return logger
 
-# middleware #2
+
+# middleware #2: authentication
+async def auth_factory(app, handler):
+	async def auth(request):
+		logging.info('check user: %s %s' % (request.method,request.path))
+		request.__user__ = None
+		cookie_str = request.cookies.get(COOKIE_NAME)
+		if cookie_str:
+			user = await cookie2user(cookie_str)
+			if user:
+				logging.info('set current user: %s' % user.email)
+				request.__user__ = user
+		if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
+			return web.HTTPFound('/signin')
+		return (await handler(request))
+	return auth
+
+# middleware #3
 async def data_factory(app, handler):
 	async def parse_data(request):
 		if request.method == 'POST':
@@ -84,11 +77,11 @@ async def data_factory(app, handler):
 				logging.info('request json: %s' % str(request.__data__))
 			elif request.content_type.startswith('application/x-www-form-urlencoded'):
 				request.__data__ = await request.post()
-				logging.info('request form: %s' % str(request.__data__))
+				logging.info('request from: %s' % str(request.__data__))
 		return (await handler(request))
 	return parse_data
 
-# middleware #3: deal with output after handler
+# middleware #4: deal with output after handler
 async def response_factory(app, handler):
 	async def response(request):
 		logging.info('Response handler...')
@@ -114,6 +107,7 @@ async def response_factory(app, handler):
 				resp.content_type = 'application/json;charset=utf-8'
 				return resp
 			else:
+				r['__user__'] = request.__user__
 				resp = web.Response(body=app['__templating__'].get_template(template).render(**r).encode('utf-8'))
 				resp.content_type = 'text/html;charset=utf-8'
 				return resp
@@ -129,19 +123,6 @@ async def response_factory(app, handler):
 		return resp
 	return response
 
-# middleware #4: authentication
-async def auth_factory(app, handler):
-	async def auth(request):
-		logging.info('check user: %s %s' % (request.method, auth_factory,request.path))
-		request.__user__ = None
-		cookie_str = request.cookies.get(COOKIE_NAME)
-		if cookie_str:
-			user = await cookie2user(cookie_str)
-			if user:
-				logging.info('set current user: %s' % user.email)
-				request.__user__ = user
-		return (await handler(reqeust))
-	return auth
 
 def datetime_filter(t):
 	print(int(time.time()))
@@ -160,7 +141,7 @@ def datetime_filter(t):
 #please make sure that the port is 9000
 async def init(loop):
 	await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='password', db='awesome')
-	app = web.Application(loop=loop,middlewares=[logger_factory,response_factory])
+	app = web.Application(loop=loop,middlewares=[logger_factory,auth_factory,response_factory])
 	init_jinja2(app, filters = dict(datetime = datetime_filter))
 	add_routes(app, 'handlers')
 	add_static(app)
