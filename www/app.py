@@ -18,7 +18,7 @@ from coroweb import add_routes, add_static
 from config  import configs
 from handlers import cookie2user, COOKIE_NAME
 
-def init_jinja2(app, **kw):
+def init_jinja2(app, **kw):  #initiate jinja2
 	logging.info('init jinja2...')
 	options = dict(
 		autoescape = kw.get('autoescape', True),

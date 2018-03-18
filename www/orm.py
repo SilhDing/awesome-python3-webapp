@@ -259,6 +259,7 @@ class Model(dict, metaclass = ModelMetaclass):
 		rs = await select('%s where `%s`=?' % (cls.__select__, cls.__primary_key__), [pk], 1)
 		if len(rs) == 0:
 			return None
+		logging.info('~~~~~~~~~', rs[0])
 		return cls(**rs[0])
 
 	async def save(self):

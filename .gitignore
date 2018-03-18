@@ -113,6 +113,9 @@ venv.bak/
 # Icon must end with two \r
 Icon
 
+# vscode
+.vscode/
+
 
 # Thumbnails
 ._*
