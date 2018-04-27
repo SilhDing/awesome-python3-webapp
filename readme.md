@@ -1,4 +1,4 @@
-## Web Application based on Python.
+## Web Application based on Python3.
 
 ### 相比教程，本工程新功能包括：
 
@@ -10,8 +10,3 @@
 * **其他:** 所有的超链接均实现。
 
 欢迎联系作者：<dingyihang1994@gmail.com>
- 
- 
- 
- |aa|aa|
- 
