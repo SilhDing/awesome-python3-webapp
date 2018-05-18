@@ -145,8 +145,8 @@ async def init(loop):
 	init_jinja2(app, filters = dict(datetime = datetime_filter))
 	add_routes(app, 'handlers')
 	add_static(app)
-	srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
-	logging.info('server started at http://127.0.0.1:9000...')
+	srv = await loop.create_server(app.make_handler(), '0.0.0.0', 9000)
+	logging.info('server started at http://0:9000...')
 	return srv
 
 loop = asyncio.get_event_loop()
