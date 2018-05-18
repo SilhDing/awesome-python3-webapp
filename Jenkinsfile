@@ -8,7 +8,7 @@ pipeline {
     }
     stage('RUN') {
       steps {
-        sh 'python app.py'
+        sh 'python www/app.py'
       }
     }
   }
