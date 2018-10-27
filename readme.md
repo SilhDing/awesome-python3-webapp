@@ -1,19 +1,18 @@
 ## Web Application based on Python3.
 
-### 相比教程，本工程新功能包括：
+### Compared with the tutorial, the new features of this application include：
 
-* **增加了删除用户功能:** 用户删除后，其评论不会被删除，不过名字会被标记“该用户已被删除”；
-* **完善评论删除功能:** 文章被删除后，对应的评论也被删除；
-* **晚上管理功能:** 评论的管理页面新增评论对应的文章标题，并可直接点击文章名进入博文页面；
-* **增加页码管理:** 所有的列表页面均显示项目总数和当前页数、总页数。
-* **网页增加新内容:** 增加了“留学”、“关于作者”新的内容，具体内容仍在开发中。
-* **其他:** 所有的超链接均实现。
+* **delete a registered user account:** Once the user account is deleted, its comments are still maintained; but the user name will be marked with "deleted";
+* **improve the management of comments:** Once a article is deleted，its corresponding comments are removed either;
+* **improve the backstage management system:** On the page of "comment management", users may directly see the article names from which that comment come; users may directly access those articles by clicking their names;
+* **item information:** show number of all items, current number or other information;
+* **new contents:** more sections such "about author" and "study in US"
 
-**注意**: 这里提供了四个API以供以后进一步开发调用：
+**Note**: 4 REST APIs are provided for future development：
 
-* `/api/blogs/{id}`：指定id的博客API
-* `/api/blogs`：所有博客内容API，默认第一页
-* `/api/comments`：所有评论API，默认第一页
-* `/api/users`：所有用户API，默认第一页，密码不予以显示
+* `/api/blogs/{id}`：get the blog with a specified ID
+* `/api/blogs`：get blogs on the first page (by default)
+* `/api/comments`：get comments on the first page (by default)
+* `/api/users`：get users on the first page (by default); passwords are blocked
 
-欢迎联系作者：<dingyihang1994@gmail.com>
+Contact author：<dingyihang1994@gmail.com>
